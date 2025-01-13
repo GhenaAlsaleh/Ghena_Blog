@@ -2,9 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\tag;
+use App\Models\Tag;
 use Illuminate\Http\Request;
-use App\Models\User;
 use Illuminate\Contracts\Session\Session;
 use Illuminate\Support\Facades\Session as FacadesSession;
 
@@ -15,18 +14,8 @@ class TagController extends Controller
      */
     public function index()
     {
-        $this->authorize("manageUser",User::class);
         $tags=Tag::all();
-        return view("tags.index",compact("tags"));
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        $this->authorize("manageUser",User::class);
-        return view("tags.create");
+        return response()->json(["message"=>"this is all tags","tags"=>$tags],200);
     }
 
     /**
@@ -34,40 +23,37 @@ class TagController extends Controller
      */
     public function store(Request $request)
     {
-        $this->authorize("manageUser",User::class);
         $request->validate([
             "word"=>"required|string|max:255"
         ]);
-        Tag::create([
+        $tag=Tag::create([
             "word"=>$request->word
         ]);
-        return redirect()->route("tags.index");
+        return response()->json(["message"=>"tag added successfully","tag"=>$tag],200);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(tag $tag)
+    public function show($id)
     {
-        $this->authorize("manageUser",User::class);
-        return view('tags.show', compact('tag'));
-    }
+        $tag=Tag::find($id);
+        if(!$tag){
+            return response()->json(["message"=>"tag not found"],404);
+        }
+        return response()->json(["message"=>"show tag successfuly","tag"=>$tag],200);
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(tag $tag)
-    {
-        $this->authorize("manageUser",User::class);
-        return view('tags.edit', compact('tag'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, tag $tag)
+    public function update(Request $request,$id)
     {
-        $this->authorize("manageUser",User::class);
+        $tag=Tag::find($id);
+        if(!$tag){
+            return response()->json(["message"=>"tag not found"],404);
+        }
          $request->validate([
             "word"=>"required|string|max:255"
         ]);
@@ -75,16 +61,19 @@ class TagController extends Controller
             "word"=>$request->word
         ]);
 
-        return redirect()->route('tags.index');
+        return response()->json(["message"=>"tag updated successfuly","tag"=>$tag],200); 
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(tag $tag)
+    public function destroy($id)
     {
-        $this->authorize("manageUser",User::class);
+        $tag=Tag::find($id);
+        if(!$tag){
+            return response()->json(["message"=>"tag not found"],404);
+        }
         $tag->delete();
-        return redirect()->route('tags.index');
+        return response()->json(["message"=>"tag deleted successfully"],200);
     }
 }

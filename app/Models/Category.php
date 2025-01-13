@@ -11,7 +11,4 @@ class Category extends Model
         'image_category'
     ];
 
-    public function posts(){
-        return $this->hasMany(Post::class);
-    }
 }
